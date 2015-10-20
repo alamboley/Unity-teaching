@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
@@ -29,9 +30,9 @@ public class PlayerController : MonoBehaviour {
 	void FixedUpdate() {
 
 		if (Input.GetKeyDown (KeyCode.Space))
-			changeState (STATE_HADOOKEN);	
+			changeState(STATE_HADOOKEN);	
 
-		else if (Input.GetKey ("up") && !_isPlaying_hadooken && !_isPlaying_crouch) {
+		else if (Input.GetKey(KeyCode.UpArrow) && !_isPlaying_hadooken && !_isPlaying_crouch) {
 
 			if(_isGrounded) {
 
@@ -40,36 +41,33 @@ public class PlayerController : MonoBehaviour {
 				changeState(STATE_JUMP);
 			}
 
-		} else if (Input.GetKey ("down"))
+		} else if (Input.GetKey(KeyCode.DownArrow))
 			changeState(STATE_CROUCH);	
 
-		else if (Input.GetKey ("right") && !_isPlaying_hadooken) {
+		else if (Input.GetKey(KeyCode.RightArrow) && !_isPlaying_hadooken) {
 
-			changeDirection ("right");
+			changeDirection("right");
 			transform.Translate(Vector3.left * walkSpeed * Time.deltaTime);
 
-			if(_isGrounded)
+			if (_isGrounded)
 				changeState(STATE_WALK);
 			
-		} else if (Input.GetKey ("left") && !_isPlaying_hadooken) {
+		} else if (Input.GetKey(KeyCode.LeftArrow) && !_isPlaying_hadooken) {
 
-			changeDirection ("left");
+			changeDirection("left");
 			transform.Translate(Vector3.left * walkSpeed * Time.deltaTime);
 
-			if(_isGrounded)
+			if (_isGrounded)
 				changeState(STATE_WALK);
 			
-		} else {	
-
-			if(_isGrounded)
-				changeState(STATE_IDLE);
-		}
+		} else if(_isGrounded)
+			changeState(STATE_IDLE);
 
 		_isPlaying_crouch = animator.GetCurrentAnimatorStateInfo(0).IsName("ken_crouch");
 		_isPlaying_hadooken = animator.GetCurrentAnimatorStateInfo(0).IsName("ken_hadooken");
 	}
 
-	void changeState(int state){
+	void changeState(int state) {
 
 		if (_currentAnimationState == state)
 			return;
@@ -91,14 +89,13 @@ public class PlayerController : MonoBehaviour {
 
 		if (_currentDirection != direction) {
 
-			if (direction == "right") {
+			if (direction == "right")
 				transform.Rotate (0, 180, 0);
-				_currentDirection = "right";
 
-			} else if (direction == "left") {
+			else if (direction == "left")
 				transform.Rotate (0, -180, 0);
-				_currentDirection = "left";
-			}
+
+			_currentDirection = direction;
 		}
 		
 	}
