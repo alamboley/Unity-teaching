@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour {
 
 		else if (Input.GetKey(KeyCode.UpArrow) && !_isPlaying_hadooken && !_isPlaying_crouch) {
 
-			if(_isGrounded) {
+			if (_isGrounded) {
 
 				_isGrounded = false;
 				GetComponent<Rigidbody2D>().AddForce(new Vector2(0, 250));
@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour {
 		else if (Input.GetKey(KeyCode.RightArrow) && !_isPlaying_hadooken) {
 
 			changeDirection("right");
-			transform.Translate(Vector3.left * walkSpeed * Time.deltaTime);
+			transform.Translate(Vector3.left * walkSpeed * Time.fixedDeltaTime);
 
 			if (_isGrounded)
 				changeState(STATE_WALK);
@@ -55,12 +55,12 @@ public class PlayerController : MonoBehaviour {
 		} else if (Input.GetKey(KeyCode.LeftArrow) && !_isPlaying_hadooken) {
 
 			changeDirection("left");
-			transform.Translate(Vector3.left * walkSpeed * Time.deltaTime);
+			transform.Translate(Vector3.left * walkSpeed * Time.fixedDeltaTime);
 
 			if (_isGrounded)
 				changeState(STATE_WALK);
 			
-		} else if(_isGrounded)
+		} else if (_isGrounded)
 			changeState(STATE_IDLE);
 
 		_isPlaying_crouch = animator.GetCurrentAnimatorStateInfo(0).IsName("ken_crouch");
