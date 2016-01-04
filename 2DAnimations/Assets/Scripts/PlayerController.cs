@@ -3,101 +3,154 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
-	public float walkSpeed = 1;
-
-	bool _isGrounded = true;
+	public float walkSpeed;
 
 	Animator animator;
+	Rigidbody2D rigidBody;
 
-	bool _isPlaying_crouch = false;
-	bool _isPlaying_hadooken = false;
+	bool isGrounded = true;
 
+	bool goingRight = false;
+	public bool GoingRight {
 
-	const int STATE_IDLE = 0;
-	const int STATE_WALK = 1;
-	const int STATE_CROUCH = 2;
-	const int STATE_JUMP = 3;
-	const int STATE_HADOOKEN = 4;
+		get { return goingRight; }
+
+		set {
+
+			if (goingRight == value)
+				return;
+
+			goingRight = value;
+			Vector3 tmpScale = transform.localScale;
+			tmpScale.x = goingRight ? -1 : 1;
+			transform.localScale = tmpScale;
+		}
+	}
+
+	bool isWalking = false;
+	public bool IsWalking {
+
+		get { return isWalking; }
+
+		set {
+
+			if (isWalking == value)
+				return;
+
+			animator.SetBool ("isWalking", isWalking = true);
+		}
+	}
+
+	bool isCrouching = false;
+	public bool IsCrouching {
+
+		get { return isCrouching; }
+
+		set {
+
+			if (isCrouching == value)
+				return;
+
+			animator.SetBool("isCrouching", isCrouching = value);
+		}
+	}
+
+	bool isJumping = false;
+	public bool IsJumping {
+
+		get { return isJumping; }
+
+		set {
+
+			if (isJumping == value)
+				return;
+
+			animator.SetBool("isJumping", isJumping = value);
+
+			if (isJumping && isGrounded) {
+
+				GetComponent<Rigidbody2D>().AddForce(new Vector2(0, 250));
+
+				isGrounded = false;
+			}
+		}
+	}
+
+	bool isHadookening = false;
+	public bool IsHadookening {
+
+		get { return isHadookening; }
+
+		set {
+
+			if (isHadookening == value)
+				return;
+
+			animator.SetBool("isHadookening", isHadookening = value);
+		}
+	}
+
+	string direction = "";
+	public string Direction {
+
+		get { return direction; }
+
+		set {
+
+			if (direction == value)
+				return;
+
+			direction = value;
+
+			bool isMoving = direction != "";
+
+			if (isMoving) 
+				GoingRight = direction == "right";
+
+			animator.SetBool("isWalking", isMoving);
+		}
+	}
 	
-	string _currentDirection = "left";
-	int _currentAnimationState = STATE_IDLE;
-	
-	void Start() {
 
-		animator = this.GetComponent<Animator>();
+	// Use this for initialization
+	void Start () {
+
+		animator = GetComponent<Animator> ();
+		rigidBody = GetComponent<Rigidbody2D> ();
+	}
+
+	void Update() {
+
+		IsHadookening = Input.GetKey (KeyCode.Space);
+
+		IsJumping = Input.GetKey (KeyCode.UpArrow);
+
+		IsCrouching = Input.GetKey (KeyCode.DownArrow);
+
+		if (Input.GetKey (KeyCode.LeftArrow))
+			Direction = "left";
+		else if (Input.GetKey (KeyCode.RightArrow))
+			Direction = "right";
+		else
+			Direction = "";
 	}
 
 	void FixedUpdate() {
 
-		if (Input.GetKeyDown (KeyCode.Space))
-			changeState(STATE_HADOOKEN);	
+		Vector2 tmpVelocity = rigidBody.velocity;
 
-		else if (Input.GetKey(KeyCode.UpArrow) && !_isPlaying_hadooken && !_isPlaying_crouch) {
+		if (Direction != "" && !IsCrouching && !IsHadookening)
+			tmpVelocity.x = walkSpeed * (GoingRight ? 1 : -1) * Time.fixedDeltaTime;
 
-			if (_isGrounded) {
-
-				_isGrounded = false;
-				GetComponent<Rigidbody2D>().AddForce(new Vector2(0, 250));
-				changeState(STATE_JUMP);
-			}
-
-		} else if (Input.GetKey(KeyCode.DownArrow))
-			changeState(STATE_CROUCH);	
-
-		else if (Input.GetKey(KeyCode.RightArrow) && !_isPlaying_hadooken) {
-
-			changeDirection("right");
-			transform.Translate(Vector3.left * walkSpeed * Time.fixedDeltaTime);
-
-			if (_isGrounded)
-				changeState(STATE_WALK);
-			
-		} else if (Input.GetKey(KeyCode.LeftArrow) && !_isPlaying_hadooken) {
-
-			changeDirection("left");
-			transform.Translate(Vector3.left * walkSpeed * Time.fixedDeltaTime);
-
-			if (_isGrounded)
-				changeState(STATE_WALK);
-			
-		} else if (_isGrounded)
-			changeState(STATE_IDLE);
-
-		_isPlaying_crouch = animator.GetCurrentAnimatorStateInfo(0).IsName("ken_crouch");
-		_isPlaying_hadooken = animator.GetCurrentAnimatorStateInfo(0).IsName("ken_hadooken");
+		rigidBody.velocity = tmpVelocity;
 	}
 
-	void changeState(int state) {
+	void OnCollisionEnter2D(Collision2D collision) {
 
-		if (_currentAnimationState == state)
-			return;
+		if (collision.transform.name == "background") {
 
-		animator.SetInteger("state", state);
-
-		_currentAnimationState = state;
-	}
-
-	void OnCollisionEnter2D(Collision2D coll) {
-
-		if (coll.gameObject.name == "Floor") {
-			_isGrounded = true;
-			changeState(STATE_IDLE);
+			isGrounded = true;
+			IsJumping = false;
 		}
 	}
-	
-	void changeDirection(string direction) {
-
-		if (_currentDirection != direction) {
-
-			if (direction == "right")
-				transform.Rotate (0, 180, 0);
-
-			else if (direction == "left")
-				transform.Rotate (0, -180, 0);
-
-			_currentDirection = direction;
-		}
-		
-	}
-
 }
