@@ -10,23 +10,6 @@ public class PlayerController : MonoBehaviour {
 
 	bool isGrounded = true;
 
-	bool goingRight = false;
-	public bool GoingRight {
-
-		get { return goingRight; }
-
-		set {
-
-			if (goingRight == value)
-				return;
-
-			goingRight = value;
-			Vector3 tmpScale = transform.localScale;
-			tmpScale.x = goingRight ? -1 : 1;
-			transform.localScale = tmpScale;
-		}
-	}
-
 	bool isWalking = false;
 	public bool IsWalking {
 
@@ -37,7 +20,7 @@ public class PlayerController : MonoBehaviour {
 			if (isWalking == value)
 				return;
 
-			animator.SetBool ("isWalking", isWalking = true);
+			animator.SetBool ("isWalking", isWalking = value);
 		}
 	}
 
@@ -69,8 +52,7 @@ public class PlayerController : MonoBehaviour {
 
 			if (isJumping && isGrounded) {
 
-				GetComponent<Rigidbody2D>().AddForce(new Vector2(0, 250));
-
+				rigidBody.AddForce(new Vector2(0, 250));
 				isGrounded = false;
 			}
 		}
@@ -90,8 +72,8 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	string direction = "";
-	public string Direction {
+	int direction = 0;
+	public int Direction {
 
 		get { return direction; }
 
@@ -101,13 +83,8 @@ public class PlayerController : MonoBehaviour {
 				return;
 
 			direction = value;
-
-			bool isMoving = direction != "";
-
-			if (isMoving) 
-				GoingRight = direction == "right";
-
-			animator.SetBool("isWalking", isMoving);
+			
+			GetComponent<SpriteRenderer>().flipX = direction == 1;
 		}
 	}
 	
@@ -121,26 +98,32 @@ public class PlayerController : MonoBehaviour {
 
 	void Update() {
 
-		IsHadookening = Input.GetKey (KeyCode.Space);
+		IsHadookening = Input.GetKey(KeyCode.Space);
 
-		IsJumping = Input.GetKey (KeyCode.UpArrow);
+		IsJumping = Input.GetKey(KeyCode.UpArrow);
 
-		IsCrouching = Input.GetKey (KeyCode.DownArrow);
+		IsCrouching = Input.GetKey(KeyCode.DownArrow);
 
 		if (Input.GetKey (KeyCode.LeftArrow))
-			Direction = "left";
+			Direction = -1;
 		else if (Input.GetKey (KeyCode.RightArrow))
-			Direction = "right";
+			Direction = 1;
 		else
-			Direction = "";
+			Direction = 0;
 	}
 
 	void FixedUpdate() {
 
 		Vector2 tmpVelocity = rigidBody.velocity;
 
-		if (Direction != "" && !IsCrouching && !IsHadookening)
+		if (Direction != 0 && !IsCrouching && !IsHadookening) {
+			
 			tmpVelocity.x = walkSpeed * (GoingRight ? 1 : -1) * Time.fixedDeltaTime;
+			
+			IsWalking = true;
+			
+		} else
+			IsWalking = false;
 
 		rigidBody.velocity = tmpVelocity;
 	}
