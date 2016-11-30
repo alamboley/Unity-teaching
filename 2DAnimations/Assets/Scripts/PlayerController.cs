@@ -118,7 +118,7 @@ public class PlayerController : MonoBehaviour {
 
 		if (Direction != 0 && !IsCrouching && !IsHadookening) {
 			
-			tmpVelocity.x = walkSpeed * (GoingRight ? 1 : -1) * Time.fixedDeltaTime;
+			tmpVelocity.x = walkSpeed * Direction * Time.fixedDeltaTime;
 			
 			IsWalking = true;
 			
